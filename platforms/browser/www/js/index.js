@@ -1,43 +1,98 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+document.addEventListener("deviceready", onDeviceReady, false);
 
-    function populateDB(tx) 
+var db = window.openDatabase("Database", "1.0", "Cordova Demo", 200000);
+var appli = "id, nom, date_debut, duree";
+var nom;
+var date_debut;
+var duree;
+
+function onDeviceReady() 
+{
+   db.transaction(populateDB, errorCB, successCB);
+}
+
+
+function populateDB(tx) 
+{
+    // tx.executeSql('CREATE TABLE IF EXISTS Gantt; 
+    tx.executeSql('CREATE TABLE IF NOT EXISTS Gantt (id, nom, date_début, durée )');
+}
+    
+function errorCB(err) 
+{
+    alert("Error processing SQL: "+err.code);
+}
+    
+function successCB() 
+{
+    alert("success!");
+}
+
+
+function selectTable(tx)
+{
+  tx.executeSql('SELECT * FROM Gantt', [], function(tx, result)
+  {
+      console.log(result.rows);
+  })
+}
+
+$('#bouton').click(function()
+{
+   document.location.href="http://localhost:8000/tableau.html";
+//    alert("je lis la console");
+   nom = $("#nom").val();
+   date_debut = $("#date").val();
+   duree = $("#time").val();
+//    var array= [];
+
+    // var table = array.push("nom", "date_debut", "duree");
+
+
+    function dispAll(tx)
     {
-        tx.executeSql('DROP TABLE IF EXISTS GANTT');
-        tx.executeSql('CREATE TABLE IF NOT EXISTS GANTT (id unique, nom, date_début, durée )');
-        tx.executeSql('INSERT INTO GANTT (id, nom, date_début, durée) VALUES (1, "créer une application",  18/12/2018, "deux jours")');
-        // tx.executeSql('INSERT INTO GANTT (id, nom, date_début, durée) VALUES (2, "Second row")');
-    }
-    
-    function errorCB(err) 
-    {
-        alert("Error processing SQL: "+err.code);
-    }
-    
-    function successCB() {
-        alert("success!");
-    }
-    
-    var db = window.openDatabase("Database", "1.0", "Cordova Demo", 200000);
-    db.transaction(populateDB, errorCB, successCB);
+          tx.executeSql('SELECT * FROM Gantt;', [], function(tx, result)
+          {
+              tache = result.rows;
+              console.log(tache);
+              for (i=0; i<tache.length; i++) 
+              {
+                  
+                   $("#table").append("<tr>"+
+                       "<th scope='col'>" + tache[i].id + "</th>"+
+                       "<td scope='col'>" + tache[i].nom + "</td>"+
+                       "<td scope='col'>" + tache[i].debut + "</td>"+
+                       "<td scope='col'>" + tache[i].duree + "</td></tr>")
+                   
+              }
+          })};
    
+//    console.log(nom);
+//    console.log(date_debut);
+//    console.log(duree);
+   
+//    alert("j'ai remplis mes variables");
+   db.transaction(insert, errorCB, successCB);
+//    alert("j'ai insert into");
+   db.transaction(selectTable, errorCB, successCB);
+//    alert("je select *");
+//    document.location.href="http://localhost:8000/tableau.html";
+});
 
-app.initialize();
+
+function insert(tx)
+{
+   console.log(nom);
+   console.log(date_debut);
+   console.log(duree);
+   
+   tx.executeSql('INSERT INTO Gantt (id, nom, date_debut, duree) VALUES (1, "' + nom + '", "'+ date_debut + '", "'+ duree +'", "")');
+}
+
+
+
+   
+    
+
 
 
